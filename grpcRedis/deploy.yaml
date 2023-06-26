@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rateapp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: grpcredis
+  name: grpcredis
+  namespace: rateapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: grpcredis
+  template:
+    metadata:
+      labels:
+        app: grpcredis
+    spec:
+      containers:
+        - image: estergema/grpcredis
+          imagePullPolicy: Always
+          name: grpcredis
+          ports:
+            - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: grpcredis
+  name: grpcredis
+  namespace: rateapp
+spec:
+  type: LoadBalancer
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+  selector:
+    app: grpcredis
