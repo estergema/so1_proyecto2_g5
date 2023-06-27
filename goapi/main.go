@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
-
+	"github.com/gofiber/fiber/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"log"
 )
 
 var ctx = context.Background()
@@ -22,6 +22,7 @@ func insertData(c *fiber.Ctx) error {
 	var data map[string]string
 	e := c.BodyParser(&data)
 	if e != nil {
+		fmt.Println("Error Body" + e.Error())
 		return e
 	}
 
@@ -32,20 +33,20 @@ func insertData(c *fiber.Ctx) error {
 		Ranked: data["ranked"],
 	}
 
-	go sendRedisServer(rank)
-	go sendMysqlServer(rank)
+	sendRedisServer(rank)
+	//go sendMysqlServer(rank)
 
-	return nil
+	return c.JSON(fiber.Map{"res": "insert successful"})
 }
 
 func sendRedisServer(rank Data) {
-	conn, err := grpc.Dial("", grpc.WithTransportCredentials(insecure.NewCredentials()),
+	conn, err := grpc.Dial("34.27.129.65:3001", grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithBlock())
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	cl := pb.NewGetInfoClient(conn)
+	cl := NewGetInfoClient(conn)
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
@@ -53,7 +54,7 @@ func sendRedisServer(rank Data) {
 		}
 	}(conn)
 
-	ret, err := cl.ReturnInfo(ctx, &pb.RequestId{
+	ret, err := cl.ReturnInfo(ctx, &RequestId{
 		Artist: rank.Artist,
 		Album:  rank.Album,
 		Year:   rank.Year,
@@ -78,10 +79,10 @@ func main() {
 			"res": "todo bien",
 		})
 	})
+
 	app.Post("/insert", insertData)
 
-	err := app.Listen(":3000")
-	if err != nil {
-		return
-	}
+	fmt.Println("Corriendo puerto 3000")
+	app.Listen(":3000")
+
 }

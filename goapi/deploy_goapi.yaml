@@ -7,38 +7,38 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: grpcredis
-  name: grpcredis
+    app: goapi
+  name: goapi
   namespace: rateapp
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: grpcredis
+      app: goapi
   template:
     metadata:
       labels:
-        app: grpcredis
+        app: goapi
     spec:
       containers:
-        - image: estergema/grpcredis
+        - image: estergema/goapi
           imagePullPolicy: Always
-          name: grpcredis
+          name: goapi
           ports:
-            - containerPort: 8000
+            - containerPort: 3000
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: grpcredis
-  name: grpcredis
+    app: goapi
+  name: goapi
   namespace: rateapp
 spec:
   type: LoadBalancer
   ports:
     - name: http
-      port: 8000
-      targetPort: 8000
+      port: 3000
+      targetPort: 3000
   selector:
-    app: grpcredis
+    app: goapi
