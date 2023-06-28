@@ -2,9 +2,7 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql" // La librería que nos permite conectar a MySQL
 	"google.golang.org/grpc"
 	_ "google.golang.org/grpc"
 	"gorm.io/driver/mysql"
@@ -12,9 +10,6 @@ import (
 	"log"
 	"net"
 )
-
-var ctx = context.Background()
-var db *sql.DB
 
 type server struct {
 	UnimplementedGetInfoServer
@@ -25,7 +20,7 @@ const (
 )
 
 var Database *gorm.DB
-var Uri = "root:secret@tcp(34.68.177.89)/FASE2?charset=utf8mb4&parseTime=True&loc=Local"
+var Uri = "root:secret@tcp(10.23.224.3)/FASE2?charset=utf8mb4&parseTime=True&loc=Local"
 
 type Data struct {
 	gorm.Model
