@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rateapp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: grpcmysql
+  name: grpcmysql
+  namespace: rateapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: grpcmysql
+  template:
+    metadata:
+      labels:
+        app: grpcmysql
+    spec:
+      containers:
+        - image: estergema/grpcmysql
+          imagePullPolicy: Always
+          name: grpcmysql
+          ports:
+            - containerPort: 3002
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: grpcmysql
+  name: grpcmysql
+  namespace: rateapp
+spec:
+  type: LoadBalancer
+  ports:
+    - name: http
+      port: 3002
+      targetPort: 3002
+  selector:
+    app: grpcmysql
