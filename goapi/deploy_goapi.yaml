@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rateapp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: goapi
+  name: goapi
+  namespace: rateapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: goapi
+  template:
+    metadata:
+      labels:
+        app: goapi
+    spec:
+      containers:
+        - image: estergema/goapi
+          imagePullPolicy: Always
+          name: goapi
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: goapi
+  name: goapi
+  namespace: rateapp
+spec:
+  type: LoadBalancer
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+  selector:
+    app: goapi
