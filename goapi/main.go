@@ -33,8 +33,8 @@ func insertData(c *fiber.Ctx) error {
 		Ranked: data["ranked"],
 	}
 
-	sendRedisServer(rank)
-	//go sendMysqlServer(rank)
+	go sendRedisServer(rank)
+	go sendMysqlServer(rank)
 
 	return c.JSON(fiber.Map{"res": "insert successful"})
 }
@@ -68,7 +68,31 @@ func sendRedisServer(rank Data) {
 }
 
 func sendMysqlServer(rank Data) {
+	conn, err := grpc.Dial("34.66.32.89:3002", grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock())
+	if err != nil {
+		log.Fatalln(err)
+	}
 
+	cl := NewGetInfoClient(conn)
+	defer func(conn *grpc.ClientConn) {
+		err := conn.Close()
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}(conn)
+
+	ret, err := cl.ReturnInfo(ctx, &RequestId{
+		Artist: rank.Artist,
+		Album:  rank.Album,
+		Year:   rank.Year,
+		Ranked: rank.Ranked,
+	})
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Println("Respuesta del server MYSQL" + ret.GetInfo())
 }
 
 func main() {
